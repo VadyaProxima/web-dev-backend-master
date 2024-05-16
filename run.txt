@@ -1,0 +1,52 @@
+После установки ноды проверка, что все ок
+node -v
+npm -v
+
+Создаем папку и создаем там проект
+nest new .
+
+Библиотека для .env
+npm i @nestjs/config
+
+Создание ресурса category без тестов
+nest g resource category --no-spec
+
+Установить Swagger
+npm install --save @nestjs/swagger
+
+Установить TypeORM и PostgreSQL
+npm i @nestjs/typeorm typeorm pg
+
+Установить Validation
+npm i --save class-validator class-transformer
+
+
+----------------------------------------------------
+Старт проекта в режиме разработки
+npm run start:dev
+----------------------------------------------------
+
+Пофиксить ошибки ESLint
+npm run lint
+
+
+====================================================
+1. Объяснить модуль, контроллер, провайдер
+2. Создать ресурс и показать его работу в Postman и браузере
+    nest g resource category --no-spec
+3. Установить Swagger
+    npm install --save @nestjs/swagger
+4. Показать работу свагера и запросы в F12 браузера
+5. Установить TypeORM и PostgreSQL
+    npm i @nestjs/typeorm typeorm pg
+    1. Добавить в .env
+    2. Добавить configs
+    3. Дополнить app.module.ts, category.entity.ts
+6. Установить
+    npm i --save class-validator class-transformer	
+    1. Дополнить nest-cli.json, create-category.dto.ts, category.module.ts
+    2. Запустить и проверить таблицу в БД
+7. Дополнить category.service.ts
+
+8. Создать ресурс promo
+    npm i -D @types/multer
