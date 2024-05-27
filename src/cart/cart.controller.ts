@@ -6,6 +6,8 @@ import {
   UseGuards,
   Req,
   Patch,
+  Param,
+  Delete,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
@@ -18,22 +20,30 @@ import { UpdateCartDto } from './dto/update-cart.dto';
 // @ApiBearerAuth()
 // @UseGuards(JwtAuthGuard)
 export class CartController {
-  constructor(private readonly cartService: CartService) { }
+  constructor(private readonly cartService: CartService) {}
 
   @Post()
-  async create(@Body() dto: CreateCartDto, @Req() req: any) {
-console.log("**", req.id);
-    return this.cartService.create(dto, req.id);
+  async create(@Body() createCartDto: CreateCartDto) {
+    return this.cartService.create(1, createCartDto);
   }
 
   @Get()
-  get(@Req() req: any) {
-    console.log(req);
-    return this.cartService.getItemsInCart(req.id);
+  findAll() {
+    return this.cartService.findAll();
   }
 
-  @Patch()
-  patch(@Body() dto: UpdateCartDto, @Req() req: any) {
-    return this.cartService.update(dto, req.id);
+  @Get('total-price')
+  async getTotalPrice(): Promise<number> {
+    return await this.cartService.calculateTotalPrice();
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updatecartDto: UpdateCartDto) {
+    return this.cartService.update(+id, updatecartDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.cartService.remove(+id);
   }
 }

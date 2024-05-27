@@ -1,24 +1,18 @@
-import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { UserId } from '../decorators/user-id.decorator';
+import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 
+@ApiBearerAuth('token')
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 @ApiTags('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post('register')
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
-
   @Get('me')
-  // @ApiBearerAuth()
-  // @UseGuards(JwtAuthGuard)
   getMe(@UserId() id: number) {
     return this.usersService.findById(id);
   }

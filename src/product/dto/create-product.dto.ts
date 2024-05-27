@@ -17,7 +17,7 @@ export class CreateProductDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  name: string = 'Тренажер';
+  name: string;
 
   // @ApiProperty()
   // @IsString()

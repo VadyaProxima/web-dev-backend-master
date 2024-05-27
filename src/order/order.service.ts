@@ -1,71 +1,42 @@
-import { OrderEntity } from './entities/order.entity';
-import { OrderItemEntity } from './entities/order_item.entity';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CartService } from 'src/cart/cart.service';
-import { UserEntity } from 'src/users/entities/user.entity';
 import { Injectable } from '@nestjs/common';
-import { ProductEntity } from 'src/product/entities/product.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { OrderEntity } from './entities/order.entity';
+import { CartEntity } from '../cart/entities/cart_item.entity';
 
 @Injectable()
 export class OrderService {
   constructor(
-    @InjectRepository(OrderItemEntity)
-    private orderItemRepository: Repository<OrderItemEntity>,
-    @InjectRepository(UserEntity)
-    private userRepository: Repository<UserEntity>,
     @InjectRepository(OrderEntity)
     private orderRepository: Repository<OrderEntity>,
-    private cartService: CartService,
+    @InjectRepository(CartEntity)
+    private cartRepository: Repository<CartEntity>,
   ) {}
 
-  async order(user: UserEntity, address: string): Promise<any> {
-    //find user's cart items
-    const cartItems = await this.cartService.getItemsInCart(user.id);
+  async createOrder(id: number, deliveryAddress: string): Promise<OrderEntity> {
+    const cartItems = await this.cartRepository.find();
+    const cartProducts = cartItems.map((cartItem) =>
+      cartItem.productId.toString(),
+    );
 
-    // const subTotal = cartItems
-    //   // .map((cartItem) => cartItem.quantity * cartItem.item.price)
-    //   .reduce((acc, next) => acc + next);
+    const newOrder = new OrderEntity();
+    newOrder.products = cartProducts.join(', ');
+    newOrder.deliveryAddress = deliveryAddress;
+    newOrder.orderTime = new Date();
+    newOrder.totalPrice = await this.calculateTotalPrice();
+    newOrder.userId = id;
 
-    //get the authenticated user
-
-    // const authUser = await this.userRepository.findOneBy({ id: user.id });
-    // const authUsers = await this.userRepository.findBy({
-    //   id: user.id,
-    // });
-    // const authUser = await this.userRepository.findBy({
-    //   id: user.id,
-    // })[0];
-    // const authUser = authUsers[0];
-
-    const order = this.orderRepository.create();
-    order.items = [];
-    for (let i = 0; i <= cartItems.length; i++) {
-      if (cartItems[i] && cartItems[i].item) {
-        const orderItem = this.orderItemRepository.create({
-          item: cartItems[i].item,
-          // user: authUser,
-          // quantity: cartItems[i].quantity,
-        });
-        await this.orderItemRepository.save(orderItem);
-        order.items.push(orderItem);
-      }
-    }
-    order.address = address;
-    // order.totalPrice = subTotal;
-    order.user = user;
-    this.orderRepository.save(order);
-    //if users has an pending order - add item to the list of order
-    this.cartService.clearCart(user.id);
+    return await this.orderRepository.save(newOrder);
   }
 
-  async getOrders(userId: number): Promise<OrderItemEntity[]> {
-    const userOrder = await this.orderItemRepository
-      .createQueryBuilder()
-      .select('t.*')
-      .from(OrderItemEntity, 't')
-      .where('t.userId = :userId', { userId: userId })
-      .execute();
-    return userOrder;
+  async calculateTotalPrice(): Promise<number> {
+    const cartItems = await this.cartRepository.find();
+    let totalPrice = 0;
+
+    cartItems.forEach((cartItem) => {
+      totalPrice += cartItem.price * cartItem.quantity;
+    });
+
+    return totalPrice;
   }
 }

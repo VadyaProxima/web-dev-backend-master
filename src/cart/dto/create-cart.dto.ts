@@ -2,11 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCartDto {
   @ApiProperty()
-  itemId: number;
+  productId: number;
 
   @ApiProperty()
   userId: number;
-  
-  // @ApiProperty()
-  // quantity: number;
+
+  @ApiProperty()
+  quantity: number;
 }

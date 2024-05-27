@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateOrderDto {
-  @IsNotEmpty()
+export class DeleteUserDto {
   @IsString()
-  deliveryAddress: string;
+  @IsNotEmpty()
+  password: string;
 }

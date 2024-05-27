@@ -1,25 +1,34 @@
-import { Controller, Get, Post, Body, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBody,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { OrderService } from './order.service';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { OrderEntity } from './entities/order.entity';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 
-@ApiTags('order')
-@Controller('order')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@ApiTags('orders')
+@Controller('orders')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
-  create(@Body() dto: CreateOrderDto, @Req() req: any) {
-    console.log(req);
-    // authInfo = undefined
-    return this.orderService.order(req.user, dto.address);
-  }
-
-  @Get(':id')
-  findOne(@Req() req: any) {
-    return this.orderService.getOrders(req.user.id);
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Create a new order' })
+  @ApiBody({ type: OrderEntity })
+  @ApiResponse({
+    status: 201,
+    description: 'The order has been successfully created',
+  })
+  async createOrder(
+    @Req() req,
+    @Body('deliveryAddress') deliveryAddress: string,
+  ): Promise<OrderEntity> {
+    const { id } = req.user;
+    return this.orderService.createOrder(id, deliveryAddress);
   }
 }

@@ -16,9 +16,6 @@ export class ProductService {
 
     @InjectRepository(CategoryEntity)
     private categoryRepository: Repository<CategoryEntity>,
-
-    // @InjectRepository(BrandEntity)
-    // private brandRepository: Repository<BrandEntity>,
   ) {}
 
   async create(
@@ -29,28 +26,17 @@ export class ProductService {
       where: { id: dto.categoryId },
     });
 
-    // const brand = await this.brandRepository.findOne({
-    //   where: { id: dto.brandId },
-    // });
-
     if (!category) {
       throw new BadRequestException(
         `Некорректная категория: id=${dto.categoryId}`,
       );
     }
 
-    // if (!brand) {
-    //   throw new BadRequestException(`Некоррктный бренд: id=${dto.brandId}`);
-    // }
-
     const product = new ProductEntity();
     product.image = image.filename;
     product.name = dto.name;
-    // product.description = dto.description;
-    // product.amount = dto.amount;
     product.price = dto.price;
     product.category = category;
-    // product.brand = brand;
     const newProduct = await this.productRepository.save(product);
 
     return newProduct;
