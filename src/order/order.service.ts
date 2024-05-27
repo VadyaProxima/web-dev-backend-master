@@ -24,7 +24,7 @@ export class OrderService {
     newOrder.deliveryAddress = deliveryAddress;
     newOrder.orderTime = new Date();
     newOrder.totalPrice = await this.calculateTotalPrice();
-    newOrder.userId = id;
+    // newOrder.userId = id;
 
     return await this.orderRepository.save(newOrder);
   }

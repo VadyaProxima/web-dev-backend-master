@@ -2,14 +2,16 @@ import {
   ForbiddenException,
   Injectable,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import * as argon2 from 'argon2';
 
 import { UserEntity } from '../users/entities/user.entity';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
+
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class AuthService {
@@ -19,12 +21,16 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  async validateUser(username: string, password: string): Promise<any> {
-    const user = await this.usersService.findByUsername(username);
-    if (user && (await argon2.verify(user.password, password))) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...result } = user;
-      return result;
+  async validateUser(username: string, password: string) {
+    try {
+      const user = await this.usersService.findByUsername(username);
+      const passwordIsMatch = argon2.verify(user.password, password);
+      if (user && passwordIsMatch) {
+        const { password, ...result } = user;
+        return result;
+      }
+    } catch (error) {
+      throw new BadRequestException('User not found');
     }
 
     return null;
@@ -37,22 +43,22 @@ export class AuthService {
     }
 
     try {
-      // Hash the password
-      const hashedPassword = await argon2.hash(dto.password);
-      dto.password = hashedPassword;
-
-      // Save user with hashed password
       const userData = await this.usersService.create(dto);
+      const { password, ...user } = userData;
       return {
+        user,
         token: this.jwtService.sign({ id: userData.id }),
       };
     } catch (err) {
+      // throw new ForbiddenException('Ошибка при регистрации');
       throw new ForbiddenException(err.message);
     }
   }
 
-  async login(user: UserEntity) {
+  async login(userData: UserEntity) {
+    const { password, ...user } = userData;
     return {
+      user,
       token: this.jwtService.sign({ id: user.id }),
     };
   }

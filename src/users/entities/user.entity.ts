@@ -1,8 +1,10 @@
+import { ApiHideProperty } from '@nestjs/swagger';
 import { CartEntity } from 'src/cart/entities/cart_item.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -25,6 +27,7 @@ export class UserEntity {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
-  // @OneToMany(() => CartEntity, (cart) => cart.user)
-  // baskets: CartEntity[];
+  // @ApiHideProperty()
+  // @ManyToOne(() => CartEntity, (cart) => cart.user)
+  // cart: CartEntity;
 }

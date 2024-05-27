@@ -1,8 +1,5 @@
 import {
-  Controller,
   Get,
-  Post,
-  Body,
   Patch,
   Param,
   Delete,
@@ -10,21 +7,25 @@ import {
   UploadedFile,
   Response,
 } from '@nestjs/common';
-import { ApiTags, ApiConsumes } from '@nestjs/swagger';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiConsumes } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-
 import { PromoService } from './promo.service';
 import { fileStorage } from './storage';
 import { CreatePromoDto } from './dto/create-promo.dto';
 import { UpdatePromoDto } from './dto/update-promo.dto';
 import { PromoEntity } from './entities/promo.entity';
 import { DeleteResult } from 'typeorm';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 
 @ApiTags('promo')
 @Controller('promo')
 export class PromoController {
   constructor(private readonly promoService: PromoService) {}
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Post()
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image', { storage: fileStorage }))
